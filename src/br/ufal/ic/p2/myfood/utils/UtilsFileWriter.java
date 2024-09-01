@@ -45,14 +45,14 @@ public class UtilsFileWriter {
     public static void salvarUsuario(Map<Integer, Usuario> usuarios) {
         StringBuilder usuariosData = new StringBuilder();
         for (Usuario usuario : usuarios.values()) {
-            if (usuario instanceof Cliente) {
+            if (usuario.getClass().equals(Cliente.class)) {
                 Cliente cliente = (Cliente) usuario;
                 usuariosData.append(cliente.getId()).append(":")
                             .append(cliente.getNome()).append(":")
                             .append(cliente.getEmail()).append(":")
                             .append(cliente.getSenha()).append(":")
                             .append(cliente.getEndereco()).append(";");
-            } else if (usuario instanceof Dono) {
+            } else if (usuario.getClass().equals(Dono.class)) {
                 Dono dono = (Dono) usuario;
                 usuariosData.append(dono.getId()).append(":")
                             .append(dono.getNome()).append(":")

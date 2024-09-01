@@ -242,7 +242,7 @@ public class Sistema {
     
     public int criarPedido(int clienteId, int empresaId) throws EmpresaNaoEncontradaException, PedidoJaExisteException, EmpresaNaoCadastradaException, DonoNaoPodeFazerPedidoException {
         Usuario cliente = usuarios.get(clienteId);
-        if (cliente instanceof Dono) {
+        if (cliente.getClass().equals(Dono.class)) {
         	throw new DonoNaoPodeFazerPedidoException();
         }
         	

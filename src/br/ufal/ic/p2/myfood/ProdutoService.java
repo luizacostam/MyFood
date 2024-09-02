@@ -1,6 +1,8 @@
 package br.ufal.ic.p2.myfood;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -14,6 +16,7 @@ import br.ufal.ic.p2.myfood.Exception.ProdutoComEsseNomeJaExisteException;
 import br.ufal.ic.p2.myfood.Exception.ProdutoNaoCadastradoException;
 import br.ufal.ic.p2.myfood.Exception.ProdutoNaoEncontradoException;
 import br.ufal.ic.p2.myfood.Exception.ValorInvalidoException;
+import br.ufal.ic.p2.myfood.models.Empresa;
 import br.ufal.ic.p2.myfood.models.Produto;
 
 public class ProdutoService {
@@ -96,6 +99,10 @@ public class ProdutoService {
             .filter(p -> p.getEmpresaId() == empresaId)
             .map(Produto::getNome)
             .collect(Collectors.joining(", ", "{[", "]}"));
+    }
+    
+    public List<Produto> getProdutos() {
+        return new ArrayList<>(produtos.values());
     }
 
     public Produto getProdutoById(int produtoId) throws ProdutoNaoEncontradoException {

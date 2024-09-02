@@ -61,7 +61,7 @@ public class Sistema {
 	private ProdutoService produtoService;
 	
 	 
-	public Sistema() throws NomeNaoPodeSerNuloException, EnderecoNaoPodeSerNuloException, CpfNaoPodeSerNuloException, ContaComEsseEmailJaExisteException, EmailInvalidoException, FormatoDeEmailInvalidoException, SenhaNaoPodeSerNulaException, CpfInvalidoException, UsuarioNaoPodeCriarUmaEmpresaException, EmpresaComEsseNomeELocalJaExisteException, EmpresaComEsseNomeJaExisteException{
+	public Sistema() throws NomeNaoPodeSerNuloException, EnderecoNaoPodeSerNuloException, CpfNaoPodeSerNuloException, ContaComEsseEmailJaExisteException, EmailInvalidoException, FormatoDeEmailInvalidoException, SenhaNaoPodeSerNulaException, CpfInvalidoException, UsuarioNaoPodeCriarUmaEmpresaException, EmpresaComEsseNomeELocalJaExisteException, EmpresaComEsseNomeJaExisteException, NomeInvalidoException, ValorInvalidoException, CategoriaInvalidaException, ProdutoComEsseNomeJaExisteException{
 		this.produtoService = new ProdutoService();
 		this.empresaService = new EmpresaService();
 		UtilsFileWriter.criarPasta();
@@ -81,6 +81,7 @@ public class Sistema {
 		UtilsFileWriter.criarPasta();
 		UtilsFileWriter.persistirDados(this.usuarios);
 		UtilsFileWriter.persistirDados2(this.empresaService.getEmpresas());
+		UtilsFileWriter.persistirDados3(this.produtoService.getProdutos());
 	}
 	
 	public Integer criarUsuario(String nome, String email, String senha, String endereco) throws EnderecoNaoPodeSerNuloException, NomeNaoPodeSerNuloException, ContaComEsseEmailJaExisteException, EmailInvalidoException, FormatoDeEmailInvalidoException, SenhaNaoPodeSerNulaException{

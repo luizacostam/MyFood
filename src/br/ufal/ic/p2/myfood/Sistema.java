@@ -73,6 +73,7 @@ public class Sistema {
         this.nextId = 1;
         this.nextPedidoId = 1;
         this.empresaService.zerarEmpresas();
+	this.produtoService.zerarProdutos(produtoService.getProdutos());
         UtilsFileWriter.limparArquivos();
     }
 	

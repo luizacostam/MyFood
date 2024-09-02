@@ -28,11 +28,12 @@ public class EmpresaService {
 
     public void zerarEmpresas() {
     	this.empresas = new HashMap<Integer, Empresa>();
+    	this.nomeToEmpresas = new HashMap<String, List<Empresa>>();
     	this.nextId = 1;
     }
     
     public int criarEmpresa(String tipoEmpresa, Usuario dono, String nome, String endereco, String tipoCozinha) throws EmpresaComEsseNomeELocalJaExisteException, UsuarioNaoPodeCriarUmaEmpresaException, EmpresaComEsseNomeJaExisteException {
-    	if (dono == null || (dono instanceof Cliente) || !(dono instanceof Dono)) {
+    	if (dono == null || dono.getClass().equals(Cliente.class)|| !(dono.getClass().equals(Dono.class))) {
             throw new UsuarioNaoPodeCriarUmaEmpresaException();
         }
         
@@ -59,7 +60,7 @@ public class EmpresaService {
     }
 
     public List<Empresa> getEmpresasDoUsuario(Usuario dono) throws UsuarioNaoPodeCriarUmaEmpresaException {
-    	if(!(dono instanceof Dono)) {
+    	if(dono.getClass().equals(Cliente.class)) {
     		throw new UsuarioNaoPodeCriarUmaEmpresaException();
     	}
         List<Empresa> resultado = new ArrayList<>();

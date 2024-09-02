@@ -1,1 +1,1 @@
-
+1:Sorvete morango:1.4:alimento;1:Sorvete chocolate:1.4:alimento;1:Refrigerante:3.4:bebida;2:Pastel de queijo:5.0:alimento;

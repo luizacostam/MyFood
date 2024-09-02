@@ -23,6 +23,11 @@ public class ProdutoService {
     private Map<Integer, Produto> produtos = new HashMap<>();
     private int nextId = 1;
 
+    public void zerarProdutos(List<Produto> produtos) {
+        this.produtos = new HashMap<Integer, Produto>();
+        this.nextId = 1;
+    }
+
     public int criarProduto(int empresaId, String nome, float valor, String categoria) throws NomeInvalidoException, ValorInvalidoException, CategoriaInvalidaException, ProdutoComEsseNomeJaExisteException {
         if (nome == null || nome.trim().isEmpty()) {
             throw new NomeInvalidoException();

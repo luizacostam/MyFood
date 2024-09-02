@@ -107,9 +107,11 @@ public class UtilsFileWriter {
     public static void limparArquivos() throws IOException{
     	File file = new File("./database/usuarios.txt"); 
     	File fileEmpresas = new File("./database/empresas.txt");
-    	if(file.delete() && fileEmpresas.delete()){
+    	File fileProdutos = new File("./database/produtos.txt");
+    	if(file.delete() && fileEmpresas.delete() && fileProdutos.delete()){
     	    file.createNewFile();
     	    fileEmpresas.createNewFile();
+    	    fileProdutos.createNewFile();
     	}else{
     	    throw new IOException();
     	}

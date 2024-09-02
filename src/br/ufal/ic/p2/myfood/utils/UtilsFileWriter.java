@@ -11,6 +11,7 @@ import java.util.Map;
 import br.ufal.ic.p2.myfood.models.Cliente;
 import br.ufal.ic.p2.myfood.models.Dono;
 import br.ufal.ic.p2.myfood.models.Empresa;
+import br.ufal.ic.p2.myfood.models.Produto;
 import br.ufal.ic.p2.myfood.models.Usuario;
 
 public class UtilsFileWriter {
@@ -78,6 +79,18 @@ public class UtilsFileWriter {
     	escreverArquivo("empresas.txt", empresasData.toString());
     }
     
+    public static void salvarProduto(List<Produto> produtos) {
+    	StringBuilder produtosData = new StringBuilder();
+    	for (Produto produto : produtos) {
+    		Produto item = (Produto) produto;
+    		produtosData.append(item.getEmpresaId()).append(":")
+    		.append(item.getNome()).append(":")
+    		.append(item.getValor()).append(":")
+    		.append(item.getCategoria()).append(";");
+    	}
+    	escreverArquivo("produtos.txt", produtosData.toString());
+    }
+    
     public static void persistirDados(Map<Integer, Usuario> dados) {
         salvarUsuario(dados);
     }
@@ -85,6 +98,11 @@ public class UtilsFileWriter {
     public static void persistirDados2(List<Empresa> dados) {
     	salvarRestaurante(dados);
     }
+    
+    public static void persistirDados3(List< Produto> dados) {
+    	salvarProduto(dados);
+    }
+    
     
     public static void limparArquivos() throws IOException{
     	File file = new File("./database/usuarios.txt"); 

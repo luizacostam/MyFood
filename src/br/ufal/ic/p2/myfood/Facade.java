@@ -40,7 +40,7 @@ import easyaccept.EasyAccept;
 public class Facade {
 	private final Sistema sistema;
 	 
-	public Facade() throws NomeNaoPodeSerNuloException, EnderecoNaoPodeSerNuloException, CpfNaoPodeSerNuloException, ContaComEsseEmailJaExisteException, EmailInvalidoException, FormatoDeEmailInvalidoException, SenhaNaoPodeSerNulaException, CpfInvalidoException, UsuarioNaoPodeCriarUmaEmpresaException, EmpresaComEsseNomeELocalJaExisteException, EmpresaComEsseNomeJaExisteException {
+	public Facade() throws NomeNaoPodeSerNuloException, EnderecoNaoPodeSerNuloException, CpfNaoPodeSerNuloException, ContaComEsseEmailJaExisteException, EmailInvalidoException, FormatoDeEmailInvalidoException, SenhaNaoPodeSerNulaException, CpfInvalidoException, UsuarioNaoPodeCriarUmaEmpresaException, EmpresaComEsseNomeELocalJaExisteException, EmpresaComEsseNomeJaExisteException, NomeInvalidoException, ValorInvalidoException, CategoriaInvalidaException, ProdutoComEsseNomeJaExisteException {
 		this.sistema = new Sistema();
 	}
 	
@@ -77,6 +77,8 @@ public class Facade {
 	}
 	
 	public int getIdEmpresa(int donoId, String nome, int indice) throws Exception {
+//		System.out.println("oiii");
+//		System.out.println(donoId + " | " + nome + " | " + indice);
 		return this.sistema.getIdEmpresa(donoId, nome, indice);
 	}
 	

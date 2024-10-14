@@ -2,39 +2,7 @@ package br.ufal.ic.p2.myfood;
 
 import java.io.IOException;
 
-import br.ufal.ic.p2.myfood.Exception.AtributoInvalidoException;
-import br.ufal.ic.p2.myfood.Exception.AtributoNaoExisteException;
-import br.ufal.ic.p2.myfood.Exception.CategoriaInvalidaException;
-import br.ufal.ic.p2.myfood.Exception.ContaComEsseEmailJaExisteException;
-import br.ufal.ic.p2.myfood.Exception.CpfInvalidoException;
-import br.ufal.ic.p2.myfood.Exception.CpfNaoPodeSerNuloException;
-import br.ufal.ic.p2.myfood.Exception.DonoNaoPodeFazerPedidoException;
-import br.ufal.ic.p2.myfood.Exception.EmailInvalidoException;
-import br.ufal.ic.p2.myfood.Exception.EmpresaComEsseNomeELocalJaExisteException;
-import br.ufal.ic.p2.myfood.Exception.EmpresaComEsseNomeJaExisteException;
-import br.ufal.ic.p2.myfood.Exception.EmpresaNaoCadastradaException;
-import br.ufal.ic.p2.myfood.Exception.EmpresaNaoEncontradaException;
-import br.ufal.ic.p2.myfood.Exception.EnderecoNaoPodeSerNuloException;
-import br.ufal.ic.p2.myfood.Exception.FormatoDeEmailInvalidoException;
-import br.ufal.ic.p2.myfood.Exception.IndiceInvalidoException;
-import br.ufal.ic.p2.myfood.Exception.LoginOuSenhaInvalidosException;
-import br.ufal.ic.p2.myfood.Exception.NaoEPossivelAdicionarNoPedidoFechadoException;
-import br.ufal.ic.p2.myfood.Exception.NaoEPossivelRemoverDeUmPedidoFechadoException;
-import br.ufal.ic.p2.myfood.Exception.NomeInvalidoException;
-import br.ufal.ic.p2.myfood.Exception.NomeNaoPodeSerNuloException;
-import br.ufal.ic.p2.myfood.Exception.PedidoJaExisteException;
-import br.ufal.ic.p2.myfood.Exception.PedidoNaoEncontradoException;
-import br.ufal.ic.p2.myfood.Exception.PedidoNaoEstaAbertoException;
-import br.ufal.ic.p2.myfood.Exception.ProdutoComEsseNomeJaExisteException;
-import br.ufal.ic.p2.myfood.Exception.ProdutoInvalidoException;
-import br.ufal.ic.p2.myfood.Exception.ProdutoNaoCadastradoException;
-import br.ufal.ic.p2.myfood.Exception.ProdutoNaoEncontradoException;
-import br.ufal.ic.p2.myfood.Exception.ProdutoNaoEncontradoNaEmpresaException;
-import br.ufal.ic.p2.myfood.Exception.ProdutoNaoPertenceAEssaEmpresaException;
-import br.ufal.ic.p2.myfood.Exception.SenhaNaoPodeSerNulaException;
-import br.ufal.ic.p2.myfood.Exception.UsuarioNaoCadastradoException;
-import br.ufal.ic.p2.myfood.Exception.UsuarioNaoPodeCriarUmaEmpresaException;
-import br.ufal.ic.p2.myfood.Exception.ValorInvalidoException;
+import br.ufal.ic.p2.myfood.Exception.*;
 import easyaccept.EasyAccept;
 
 public class Facade {
@@ -70,6 +38,10 @@ public class Facade {
 	
 	public int criarEmpresa(String tipoEmpresa, int donoId, String nome, String endereco, String tipoCozinha) throws UsuarioNaoPodeCriarUmaEmpresaException, EmpresaComEsseNomeELocalJaExisteException, EmpresaComEsseNomeJaExisteException {
 		return this.sistema.criarEmpresa(tipoEmpresa, donoId, nome, endereco, tipoCozinha);
+	}
+
+	public int criarEmpresa(String tipoEmpresa, int donoId, String nome, String endereco, String abre, String fecha, String tipoMercado) throws UsuarioNaoPodeCriarUmaEmpresaException, EmpresaComEsseNomeELocalJaExisteException, EmpresaComEsseNomeJaExisteException, FormatoDeHoraInvalidoException, HorarioInvalidoException, TipoDeEmpresaInvalidoException, NomeInvalidoException, EnderecoDaEmpresaInvalidoException, TipoDeMercadoInvalidoException {
+		return this.sistema.criarEmpresa(tipoEmpresa, donoId, nome, endereco, abre, fecha, tipoMercado);
 	}
 	
 	public String getEmpresasDoUsuario(int donoId) throws Exception {
@@ -125,4 +97,8 @@ public class Facade {
     public void removerProduto(int numeroPedido, String nomeProduto) throws ProdutoNaoEncontradoException, ProdutoInvalidoException, NaoEPossivelRemoverDeUmPedidoFechadoException {
     	sistema.removerProduto(numeroPedido, nomeProduto);
     }
+
+	public void alterarFuncionamento(int mercado, String abre, String fecha) throws HorarioInvalidoException, EmpresaNaoCadastradaException, FormatoDeHoraInvalidoException, NaoEUmMercadoValidoException {
+		sistema.alterarFuncionamento(mercado, abre, fecha);
+	}
 }

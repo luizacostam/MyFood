@@ -89,15 +89,11 @@ public class UtilsFileReader {
 			String nome = dados_atuais[2];
 			String endereco = dados_atuais[3];
 			String tipoEmpresa = dados_atuais[4];
-			
+
 			int dono = Integer.valueOf(donoId);
-//			System.out.println(dono);
-//			if (dono >= 3) {
-//				return;
-//			}
 			Usuario usuario = sistema.getUsuarioById(dono);
-			
-			if(usuario instanceof Dono) {				
+
+			if(usuario instanceof Dono) {
 				sistema.criarEmpresa(tipoEmpresa, dono, nome, endereco, tipoEmpresa);
 			} else {
 				throw new UsuarioNaoPodeCriarUmaEmpresaException();

@@ -8,41 +8,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import br.ufal.ic.p2.myfood.Exception.AtributoInvalidoException;
-import br.ufal.ic.p2.myfood.Exception.AtributoNaoExisteException;
-import br.ufal.ic.p2.myfood.Exception.CategoriaInvalidaException;
-import br.ufal.ic.p2.myfood.Exception.ContaComEsseEmailJaExisteException;
-import br.ufal.ic.p2.myfood.Exception.CpfInvalidoException;
-import br.ufal.ic.p2.myfood.Exception.CpfNaoPodeSerNuloException;
-import br.ufal.ic.p2.myfood.Exception.DonoNaoPodeFazerPedidoException;
-import br.ufal.ic.p2.myfood.Exception.EmailInvalidoException;
-import br.ufal.ic.p2.myfood.Exception.EmpresaComEsseNomeELocalJaExisteException;
-import br.ufal.ic.p2.myfood.Exception.EmpresaComEsseNomeJaExisteException;
-import br.ufal.ic.p2.myfood.Exception.EmpresaNaoCadastradaException;
-import br.ufal.ic.p2.myfood.Exception.EmpresaNaoEncontradaException;
-import br.ufal.ic.p2.myfood.Exception.EnderecoNaoPodeSerNuloException;
-import br.ufal.ic.p2.myfood.Exception.FormatoDeEmailInvalidoException;
-import br.ufal.ic.p2.myfood.Exception.IndiceInvalidoException;
-import br.ufal.ic.p2.myfood.Exception.IndiceMaiorQueOEsperadoException;
-import br.ufal.ic.p2.myfood.Exception.LoginOuSenhaInvalidosException;
-import br.ufal.ic.p2.myfood.Exception.NaoEPossivelAdicionarNoPedidoFechadoException;
-import br.ufal.ic.p2.myfood.Exception.NaoEPossivelRemoverDeUmPedidoFechadoException;
-import br.ufal.ic.p2.myfood.Exception.NaoExisteEmpresaComEsseNomeException;
-import br.ufal.ic.p2.myfood.Exception.NomeInvalidoException;
-import br.ufal.ic.p2.myfood.Exception.NomeNaoPodeSerNuloException;
-import br.ufal.ic.p2.myfood.Exception.PedidoJaExisteException;
-import br.ufal.ic.p2.myfood.Exception.PedidoNaoEncontradoException;
-import br.ufal.ic.p2.myfood.Exception.PedidoNaoEstaAbertoException;
-import br.ufal.ic.p2.myfood.Exception.ProdutoComEsseNomeJaExisteException;
-import br.ufal.ic.p2.myfood.Exception.ProdutoInvalidoException;
-import br.ufal.ic.p2.myfood.Exception.ProdutoNaoCadastradoException;
-import br.ufal.ic.p2.myfood.Exception.ProdutoNaoEncontradoException;
-import br.ufal.ic.p2.myfood.Exception.ProdutoNaoEncontradoNaEmpresaException;
-import br.ufal.ic.p2.myfood.Exception.ProdutoNaoPertenceAEssaEmpresaException;
-import br.ufal.ic.p2.myfood.Exception.SenhaNaoPodeSerNulaException;
-import br.ufal.ic.p2.myfood.Exception.UsuarioNaoCadastradoException;
-import br.ufal.ic.p2.myfood.Exception.UsuarioNaoPodeCriarUmaEmpresaException;
-import br.ufal.ic.p2.myfood.Exception.ValorInvalidoException;
+import br.ufal.ic.p2.myfood.Exception.*;
 import br.ufal.ic.p2.myfood.models.Cliente;
 import br.ufal.ic.p2.myfood.models.Dono;
 import br.ufal.ic.p2.myfood.models.Empresa;
@@ -180,6 +146,11 @@ public class Sistema {
         Usuario dono = usuarios.get(donoId);
 		return empresaService.criarEmpresa(tipoEmpresa, dono, nome, endereco, tipoCozinha);
     }
+
+    public int criarEmpresa(String tipoEmpresa, int donoId, String nome, String endereco, String abre, String fecha, String tipoMercado) throws UsuarioNaoPodeCriarUmaEmpresaException, EmpresaComEsseNomeELocalJaExisteException, EmpresaComEsseNomeJaExisteException, FormatoDeHoraInvalidoException, HorarioInvalidoException, TipoDeEmpresaInvalidoException, NomeInvalidoException, EnderecoDaEmpresaInvalidoException, TipoDeMercadoInvalidoException {
+        Usuario dono = usuarios.get(donoId);
+        return empresaService.criarEmpresa(tipoEmpresa, dono, nome, endereco, abre, fecha, tipoMercado);
+    }
 	
 	public String getEmpresasDoUsuario(int donoId) throws Exception {
 	    Usuario dono = usuarios.get(donoId);
@@ -261,8 +232,8 @@ public class Sistema {
         }
 
         Pedido novoPedido = new Pedido(cliente.getNome(), empresa.getNome());
-        pedidos.put(nextPedidoId, novoPedido);
-        return nextPedidoId++;
+        pedidos.put(novoPedido.getNumero(), novoPedido);
+        return novoPedido.getNumero();
     }
     
     public int getNumeroPedido(int clienteId, int empresaId, int indice) throws PedidoNaoEncontradoException, IndiceInvalidoException, EmpresaNaoCadastradaException {
@@ -277,14 +248,13 @@ public class Sistema {
         }
 
         List<Pedido> pedidosDoCliente = pedidos.values().stream()
-            .filter(p -> p.getCliente().equals(cliente.getNome()) && p.getEmpresa().equals(empresa.getNome()))
-            .sorted((p1, p2) -> Integer.compare(p1.getNumero(), p2.getNumero()))
-            .collect(Collectors.toList());
+                .filter(p -> p.getCliente().equals(cliente.getNome()) && p.getEmpresa().equals(empresa.getNome()))
+                .sorted((p1, p2) -> Integer.compare(p1.getNumero(), p2.getNumero()))
+                .toList();
 
         if (indice < 0 || indice >= pedidosDoCliente.size()) {
             throw new IndiceInvalidoException();
         }
-
         return pedidosDoCliente.get(indice).getNumero();
     }
     
@@ -371,5 +341,9 @@ public class Sistema {
         }
         
         pedido.removerProduto(nomeProduto);
+    }
+
+    public void alterarFuncionamento(int mercado, String abre, String fecha) throws HorarioInvalidoException, EmpresaNaoCadastradaException, FormatoDeHoraInvalidoException, NaoEUmMercadoValidoException {
+        empresaService.alterarFuncionamento(mercado, abre, fecha);
     }
 }

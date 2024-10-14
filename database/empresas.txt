@@ -1,1 +1,1 @@
-1:2:Mercado do Carlos:Rua Segura N 123:supermercado;2:2:Conveniencias do Carlos:Rua Segura N 123:minimercado;3:2:Mercado do Carlos:Rua Otima N 852:atacadista;4:3:Mercado do Roberto:Rua Segura N 123:supermercado;5:2:Pastelaria do Carlos:Rua Segura N 987:brasileira;
+1:2:Farmacia 24 horas do Carlos:Rua Segura N 123:null;2:2:Farmacia do Carlos:Rua Segura N 123:null;3:2:Farmacia 24 horas do Carlos:Rua Otima N 852:null;4:3:Farmacia do Roberto:Rua Segura N 123:null;

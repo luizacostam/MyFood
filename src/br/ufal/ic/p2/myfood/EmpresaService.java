@@ -102,6 +102,37 @@ public class EmpresaService {
         return mercado.getId();
     }
 
+    public int criarEmpresa(String tipoEmpresa, Usuario dono, String nome, String endereco, boolean aberto24Horas, int numeroFuncionarios) throws UsuarioNaoPodeCriarUmaEmpresaException, NomeInvalidoException, EnderecoDaEmpresaInvalidoException, TipoDeEmpresaInvalidoException, EmpresaComEsseNomeJaExisteException, EmpresaComEsseNomeELocalJaExisteException {
+        if (dono == null || dono.getClass().equals(Cliente.class)|| !(dono.getClass().equals(Dono.class))) {
+            throw new UsuarioNaoPodeCriarUmaEmpresaException();
+        }
+        if (nome == null || nome.isEmpty()) {
+            throw new NomeInvalidoException();
+        }
+        if (endereco == null || endereco.isEmpty()) {
+            throw new EnderecoDaEmpresaInvalidoException();
+        }
+        if(tipoEmpresa == null || !tipoEmpresa.equals("farmacia")) {
+            throw new TipoDeEmpresaInvalidoException();
+        }
+        if (nomeToEmpresas.containsKey(nome)) {
+            for (Empresa empresa : nomeToEmpresas.get(nome)) {
+                if (!empresa.getDono().equals(dono)) {
+                    throw new EmpresaComEsseNomeJaExisteException();
+                }
+            }
+        }
+        for (Empresa empresa : nomeToEmpresas.getOrDefault(nome, new ArrayList<>())) {
+            if (empresa.getEndereco().equals(endereco)) {
+                throw new EmpresaComEsseNomeELocalJaExisteException();
+            }
+        }
+        Farmacia farmacia = new Farmacia(nextId++, nome, endereco, dono, aberto24Horas, numeroFuncionarios);
+        empresas.put(farmacia.getId(), farmacia);
+        nomeToEmpresas.computeIfAbsent(nome, k -> new ArrayList<>()).add(farmacia);
+        return farmacia.getId();
+    }
+
     public boolean verificarFormatoHora(String hora) {
         String regex = "^\\d{2}:\\d{2}$";
         return hora.matches(regex);
@@ -170,6 +201,16 @@ public class EmpresaService {
                             return mercado.getFecha();
                         case "tipoMercado":
                             return mercado.getTipoMercado();
+                        default:
+                            throw new AtributoInvalidoException();
+                    }
+                } else if (empresa instanceof Farmacia) {
+                    Farmacia farmacia = (Farmacia) empresa;
+                    switch (atributo) {
+                        case "aberto24Horas":
+                            return String.valueOf(farmacia.isAberto24Horas());
+                        case "numeroFuncionarios":
+                            return String.valueOf(farmacia.getNumeroFuncionarios());
                         default:
                             throw new AtributoInvalidoException();
                     }

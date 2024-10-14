@@ -43,6 +43,10 @@ public class Facade {
 	public int criarEmpresa(String tipoEmpresa, int donoId, String nome, String endereco, String abre, String fecha, String tipoMercado) throws UsuarioNaoPodeCriarUmaEmpresaException, EmpresaComEsseNomeELocalJaExisteException, EmpresaComEsseNomeJaExisteException, FormatoDeHoraInvalidoException, HorarioInvalidoException, TipoDeEmpresaInvalidoException, NomeInvalidoException, EnderecoDaEmpresaInvalidoException, TipoDeMercadoInvalidoException {
 		return this.sistema.criarEmpresa(tipoEmpresa, donoId, nome, endereco, abre, fecha, tipoMercado);
 	}
+
+	public int criarEmpresa(String tipoEmpresa, int donoId, String nome, String endereco, boolean aberto24Horas, int numeroFuncionarios) throws UsuarioNaoPodeCriarUmaEmpresaException, NomeInvalidoException, EmpresaComEsseNomeELocalJaExisteException, EnderecoDaEmpresaInvalidoException, TipoDeEmpresaInvalidoException, EmpresaComEsseNomeJaExisteException {
+		return this.sistema.criarEmpresa(tipoEmpresa, donoId, nome, endereco, aberto24Horas, numeroFuncionarios);
+	}
 	
 	public String getEmpresasDoUsuario(int donoId) throws Exception {
 		return this.sistema.getEmpresasDoUsuario(donoId);

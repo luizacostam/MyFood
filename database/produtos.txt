@@ -1,1 +1,0 @@
-1:Paracetamol:2.4:medicamento;1:Agua Oxigenada:5.0:higiene;1:Band-Aid:1.5:curativos;2:Soro Fisiologico:2.0:higiene;

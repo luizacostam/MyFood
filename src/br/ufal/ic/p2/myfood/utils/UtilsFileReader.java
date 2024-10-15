@@ -27,60 +27,60 @@ import br.ufal.ic.p2.myfood.models.Usuario;
 
 public class UtilsFileReader {
 	public static void lerArquivos(Sistema sistema) throws EnderecoNaoPodeSerNuloException, NomeNaoPodeSerNuloException, CpfNaoPodeSerNuloException, ContaComEsseEmailJaExisteException, EmailInvalidoException, FormatoDeEmailInvalidoException, SenhaNaoPodeSerNulaException, CpfInvalidoException, UsuarioNaoPodeCriarUmaEmpresaException, EmpresaComEsseNomeELocalJaExisteException, EmpresaComEsseNomeJaExisteException, NomeInvalidoException, ValorInvalidoException, CategoriaInvalidaException, ProdutoComEsseNomeJaExisteException {
-        lerArquivo("usuarios", sistema);
-        lerArquivo("empresas", sistema);
-        lerArquivo("produtos", sistema);
+		lerArquivo("usuarios", sistema);
+		lerArquivo("empresas", sistema);
+		lerArquivo("produtos", sistema);
 	}
 	public static void lerArquivo(String arquivo, Sistema sistema) throws EnderecoNaoPodeSerNuloException, NomeNaoPodeSerNuloException, CpfNaoPodeSerNuloException, ContaComEsseEmailJaExisteException, EmailInvalidoException, FormatoDeEmailInvalidoException, SenhaNaoPodeSerNulaException, CpfInvalidoException, UsuarioNaoPodeCriarUmaEmpresaException, EmpresaComEsseNomeELocalJaExisteException, EmpresaComEsseNomeJaExisteException, NomeInvalidoException, ValorInvalidoException, CategoriaInvalidaException, ProdutoComEsseNomeJaExisteException {
-        File file = new File("./database/" + arquivo + ".txt");
+		File file = new File("./database/" + arquivo + ".txt");
 
-        if (!file.exists()) return;
+		if (!file.exists()) return;
 
-        String[] dados;
-        String linha;
-        
-        try (BufferedReader br = new BufferedReader(new FileReader(file))){
-             while ((linha = br.readLine()) != null) {
-                dados = linha.split(";");
+		String[] dados;
+		String linha;
 
-                if(arquivo.equals("usuarios")) lerUsuarios(sistema, dados);
-                if(arquivo.equals("empresas")) lerEmpresas(sistema, dados);
-                if(arquivo.equals("produtos")) lerProdutos(sistema, dados);
-            }
-        } catch (IOException e) {
-            System.out.println("Erro ao ler o arquivo " + arquivo);
-        }
-    }
-	
+		try (BufferedReader br = new BufferedReader(new FileReader(file))){
+			while ((linha = br.readLine()) != null) {
+				dados = linha.split(";");
+
+				if(arquivo.equals("usuarios")) lerUsuarios(sistema, dados);
+				if(arquivo.equals("empresas")) lerEmpresas(sistema, dados);
+				if(arquivo.equals("produtos")) lerProdutos(sistema, dados);
+			}
+		} catch (IOException e) {
+			System.out.println("Erro ao ler o arquivo " + arquivo);
+		}
+	}
+
 	private static void lerUsuarios(Sistema sistema, String[] dados) throws EnderecoNaoPodeSerNuloException, NomeNaoPodeSerNuloException, CpfNaoPodeSerNuloException, ContaComEsseEmailJaExisteException, EmailInvalidoException, FormatoDeEmailInvalidoException, SenhaNaoPodeSerNulaException, CpfInvalidoException {
-        String[] dados_atuais = null;
-        String[] var3 = dados;
-        int var4 = dados.length;
+		String[] dados_atuais = null;
+		String[] var3 = dados;
+		int var4 = dados.length;
 
-        for(int var5 = 0; var5 < var4; ++var5) {
-            String dado = var3[var5];
-            dados_atuais = dado.split(":");
-            String id = dados_atuais[0];
-            String nome = dados_atuais[1];
-            String email = dados_atuais[2];
-            String senha = dados_atuais[3];
-            String endereco = dados_atuais[4];
-            
-            if(nome.endsWith("Dono")) {
-            	String cpf = dados_atuais[5];
-            	sistema.criarUsuario(nome, email, senha, endereco, cpf);
-            } else {
-            	sistema.criarUsuario(nome, email, senha, endereco);
-            }
-        }
+		for(int var5 = 0; var5 < var4; ++var5) {
+			String dado = var3[var5];
+			dados_atuais = dado.split(":");
+			String id = dados_atuais[0];
+			String nome = dados_atuais[1];
+			String email = dados_atuais[2];
+			String senha = dados_atuais[3];
+			String endereco = dados_atuais[4];
+
+			if(nome.endsWith("Dono")) {
+				String cpf = dados_atuais[5];
+				sistema.criarUsuario(nome, email, senha, endereco, cpf);
+			} else {
+				sistema.criarUsuario(nome, email, senha, endereco);
+			}
+		}
 
 	}
-	
+
 	private static void lerEmpresas(Sistema sistema, String[] dados) throws UsuarioNaoPodeCriarUmaEmpresaException, EmpresaComEsseNomeELocalJaExisteException, EmpresaComEsseNomeJaExisteException {
 		String[] dados_atuais = null;
 		String[] var3 = dados;
 		int var4 = dados.length;
-		
+
 		for (int var5 = 0; var5 < var4; ++var5) {
 			String dado = var3[var5];
 			dados_atuais = dado.split(":");
@@ -98,15 +98,15 @@ public class UtilsFileReader {
 			} else {
 				throw new UsuarioNaoPodeCriarUmaEmpresaException();
 			}
-			
+
 		}
 	}
-	
+
 	private static void lerProdutos(Sistema sistema, String[] dados) throws NomeInvalidoException, ValorInvalidoException, CategoriaInvalidaException, ProdutoComEsseNomeJaExisteException {
 		String[] dados_atuais = null;
 		String[] var3 = dados;
 		int var4 = dados.length;
-		
+
 		for (int var5 = 0; var5 < var4; ++var5) {
 			String dado = var3[var5];
 			dados_atuais = dado.split(":");
@@ -114,11 +114,11 @@ public class UtilsFileReader {
 			String nome = dados_atuais[1];
 			String valor = dados_atuais[2];
 			String categoria = dados_atuais[3];
-			
+
 			int empresaId = Integer.parseInt(id);
 			float preco = Float.parseFloat(valor);
 			sistema.criarProduto(empresaId, nome, preco, categoria);
-			
+
 		}
 	}
 }

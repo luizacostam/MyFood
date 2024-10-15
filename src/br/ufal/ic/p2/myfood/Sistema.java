@@ -2,34 +2,28 @@ package br.ufal.ic.p2.myfood;
 
 import java.io.IOException;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 
 import br.ufal.ic.p2.myfood.Exception.*;
-import br.ufal.ic.p2.myfood.models.Cliente;
-import br.ufal.ic.p2.myfood.models.Dono;
-import br.ufal.ic.p2.myfood.models.Empresa;
-import br.ufal.ic.p2.myfood.models.Pedido;
-import br.ufal.ic.p2.myfood.models.Produto;
-import br.ufal.ic.p2.myfood.models.Usuario;
+import br.ufal.ic.p2.myfood.models.*;
 import br.ufal.ic.p2.myfood.utils.UtilsFileReader;
 import br.ufal.ic.p2.myfood.utils.UtilsFileWriter;
 
 public class Sistema {
 	private Map<Integer, Usuario> usuarios = new HashMap<Integer, Usuario>();
 	private Map<Integer, Pedido> pedidos = new HashMap<Integer, Pedido>();
-	private Integer nextId = 1;
+    private Map<Integer, Set<Integer>> entregadoresPorEmpresa;
+    private Integer nextId = 1;
 	private Integer nextPedidoId = 1;
 	private EmpresaService empresaService;
 	private ProdutoService produtoService;
 	
 	 
 	public Sistema() throws NomeNaoPodeSerNuloException, EnderecoNaoPodeSerNuloException, CpfNaoPodeSerNuloException, ContaComEsseEmailJaExisteException, EmailInvalidoException, FormatoDeEmailInvalidoException, SenhaNaoPodeSerNulaException, CpfInvalidoException, UsuarioNaoPodeCriarUmaEmpresaException, EmpresaComEsseNomeELocalJaExisteException, EmpresaComEsseNomeJaExisteException, NomeInvalidoException, ValorInvalidoException, CategoriaInvalidaException, ProdutoComEsseNomeJaExisteException{
-		this.produtoService = new ProdutoService();
+        this.usuarios = new HashMap<>();
+        this.produtoService = new ProdutoService();
 		this.empresaService = new EmpresaService();
+        this.entregadoresPorEmpresa = new HashMap<>();
 		UtilsFileWriter.criarPasta();
 		UtilsFileReader.lerArquivos(this);
 	}
@@ -39,7 +33,7 @@ public class Sistema {
         this.nextId = 1;
         this.nextPedidoId = 1;
         this.empresaService.zerarEmpresas();
-	this.produtoService.zerarProdutos(produtoService.getProdutos());
+	    this.produtoService.zerarProdutos(produtoService.getProdutos());
         UtilsFileWriter.limparArquivos();
     }
 	
@@ -95,6 +89,32 @@ public class Sistema {
 		
 		return currId;
 	}
+
+    public Integer criarUsuario(String nome, String email, String senha, String endereco, String veiculo, String placa) throws NomeNaoPodeSerNuloException, EnderecoNaoPodeSerNuloException, SenhaNaoPodeSerNulaException, ContaComEsseEmailJaExisteException, EmailInvalidoException, FormatoDeEmailInvalidoException, VeiculoInvalidoException, PlacaInvalidoException {
+        if (nome == null || nome.isEmpty()) {
+            throw new NomeNaoPodeSerNuloException();
+        }
+        if (endereco == null || endereco.isEmpty()) {
+            throw new EnderecoNaoPodeSerNuloException();
+        }
+        validarEmail(email);
+        if (senha == null || senha.isEmpty()) {
+            throw new SenhaNaoPodeSerNulaException();
+        }
+        if (veiculo == null || veiculo.isEmpty()) {
+            throw new VeiculoInvalidoException();
+        }
+        if (placa == null || placa.isEmpty()) {
+            throw new PlacaInvalidoException();
+        }
+        if (usuarios.values().stream().anyMatch(u -> u.getEmail().equals(email))) {
+            throw new ContaComEsseEmailJaExisteException();
+        }
+        Integer currId = nextId++;
+        Entregador entregador = new Entregador(currId, nome, email, senha, endereco, veiculo, placa);
+        usuarios.put(currId, entregador);
+        return currId;
+    }
 	
 	private void validarEmail(String email) throws EmailInvalidoException, FormatoDeEmailInvalidoException {
 		if (email == null || email.isEmpty() || !email.contains("@")) {
@@ -111,10 +131,6 @@ public class Sistema {
 	        throw new CpfInvalidoException();
 	    }
 	}
-	
-	public Map<Integer, Usuario> getUsuarios() {
-        return this.usuarios;
-    }
 	
 	public Usuario getUsuarioById(int id) {
 		return this.usuarios.get(id);
@@ -133,8 +149,64 @@ public class Sistema {
         }
         throw new LoginOuSenhaInvalidosException();
     }
-	
-	public String getAtributo(int id, String atributo) throws UsuarioNaoCadastradoException {
+
+    public void cadastrarEntregador(int empresaId, int entregadorId) throws EmpresaNaoCadastradaException, EntregadorJaCadastradoException, UsuarioNaoEUmEntregadorException {
+        Empresa empresa = empresaService.getEmpresaById(empresaId);
+
+        if (empresa == null) {
+            throw new EmpresaNaoCadastradaException();
+        }
+
+        Usuario entregador = usuarios.get(entregadorId);
+
+        if (entregador == null || !(entregador instanceof Entregador)) {
+            throw new UsuarioNaoEUmEntregadorException();
+        }
+
+        entregadoresPorEmpresa.putIfAbsent(empresaId, new HashSet<>());
+
+        Set<Integer> entregadores = entregadoresPorEmpresa.get(empresaId);
+
+        if (entregadores.contains(entregadorId)) {
+            throw new EntregadorJaCadastradoException();
+        }
+
+        entregadores.add(entregadorId);
+    }
+
+    public String getEntregadores(int empresaId) throws EmpresaNaoCadastradaException {
+        Empresa empresa = empresaService.getEmpresaById(empresaId);
+        if (empresa == null) {
+            throw new EmpresaNaoCadastradaException();
+        }
+
+        Set<Integer> entregadoresIds = entregadoresPorEmpresa.get(empresaId);
+        if (entregadoresIds == null || entregadoresIds.isEmpty()) {
+            return "{[]}";
+        }
+
+        List<String> emails = new ArrayList<>();
+
+        for (Integer entregadorId : entregadoresIds) {
+            Usuario entregador = usuarios.get(entregadorId);
+            if (entregador instanceof Entregador) {
+                emails.add(entregador.getEmail());
+            }
+        }
+
+        StringBuilder sb = new StringBuilder("{[");
+        for (int i = 0; i < emails.size(); i++) {
+            sb.append(emails.get(i));
+            if (i < emails.size() - 1) {
+                sb.append(", ");
+            }
+        }
+        sb.append("]}");
+
+        return sb.toString();
+    }
+
+    public String getAtributo(int id, String atributo) throws UsuarioNaoCadastradoException {
         Usuario usuario = usuarios.get(id);
         if (usuario == null) {
             throw new UsuarioNaoCadastradoException();
@@ -156,6 +228,11 @@ public class Sistema {
         Usuario dono = usuarios.get(donoId);
         return empresaService.criarEmpresa(tipoEmpresa, dono, nome, endereco, aberto24Horas, numeroFuncionarios);
     }
+
+    public String getEmpresas(int donoId) throws UsuarioNaoEUmEntregadorException {
+        return empresaService.getEmpresas(donoId);
+    }
+
 	public String getEmpresasDoUsuario(int donoId) throws Exception {
 	    Usuario dono = usuarios.get(donoId);
 	    List<Empresa> empresas = empresaService.getEmpresasDoUsuario(dono);

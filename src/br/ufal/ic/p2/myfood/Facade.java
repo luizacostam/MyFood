@@ -49,7 +49,7 @@ public class Facade {
 		return this.sistema.getEntregadores(empresaId);
 	}
 
-	public String getEmpresas(int entregadorId) throws UsuarioNaoEUmEntregadorException {
+	public String getEmpresas(int entregadorId) throws UsuarioNaoEUmEntregadorException, EmpresaNaoCadastradaException {
 		return this.sistema.getEmpresas(entregadorId);
 	}
 	

@@ -1,1 +1,1 @@
-1:2:Farmacia 24 horas do Carlos:Rua Segura N 123:null;2:2:Farmacia do Carlos:Rua Segura N 123:null;3:2:Farmacia 24 horas do Carlos:Rua Otima N 852:null;4:3:Farmacia do Roberto:Rua Segura N 123:null;
+1:2:Pastelaria:Rua Segura N 987:brasileira;2:2:Mercado:Rua Segura N 123:supermercado;3:2:Farmacia:Rua Segura N 123:null;

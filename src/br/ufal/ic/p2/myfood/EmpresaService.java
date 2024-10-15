@@ -11,14 +11,12 @@ import java.util.stream.Collectors;
 public class EmpresaService {
     private Map<Integer, Empresa> empresas = new HashMap<>();
     private Map<String, List<Empresa>> nomeToEmpresas = new HashMap<>();
-    private Map<Integer, List<Empresa>> entregadoresEmpresas = new HashMap<>();
     private int nextId = 1;
 
     public void zerarEmpresas() {
     	this.empresas = new HashMap<Integer, Empresa>();
     	this.nomeToEmpresas = new HashMap<String, List<Empresa>>();
     	this.nextId = 1;
-        this.entregadoresEmpresas = new HashMap<>();
     }
     
     public int criarEmpresa(String tipoEmpresa, Usuario dono, String nome, String endereco, String tipoCozinha) throws EmpresaComEsseNomeELocalJaExisteException, UsuarioNaoPodeCriarUmaEmpresaException, EmpresaComEsseNomeJaExisteException {
@@ -45,7 +43,6 @@ public class EmpresaService {
         Empresa novaEmpresa = new Empresa(nextId++, nome, endereco, tipoCozinha, dono);
         empresas.put(novaEmpresa.getId(), novaEmpresa);
         nomeToEmpresas.computeIfAbsent(nome, k -> new ArrayList<>()).add(novaEmpresa);
-        vincularEntregadorEmpresa(dono.getId(), novaEmpresa);
         return novaEmpresa.getId();
     }
 
@@ -98,7 +95,6 @@ public class EmpresaService {
         Mercado mercado = new Mercado(nextId++, nome, endereco, dono, abre, fecha, tipoMercado);
         empresas.put(mercado.getId(), mercado);
         nomeToEmpresas.computeIfAbsent(nome, k -> new ArrayList<>()).add(mercado);
-        vincularEntregadorEmpresa(dono.getId(), mercado);
         return mercado.getId();
     }
 
@@ -130,7 +126,6 @@ public class EmpresaService {
         Farmacia farmacia = new Farmacia(nextId++, nome, endereco, dono, aberto24Horas, numeroFuncionarios);
         empresas.put(farmacia.getId(), farmacia);
         nomeToEmpresas.computeIfAbsent(nome, k -> new ArrayList<>()).add(farmacia);
-        vincularEntregadorEmpresa(dono.getId(), farmacia);
         return farmacia.getId();
     }
 
@@ -153,31 +148,6 @@ public class EmpresaService {
             return false;
         }
     }
-
-    public String getEmpresas(int entregadorId) throws UsuarioNaoEUmEntregadorException {
-        if (!entregadoresEmpresas.containsKey(entregadorId)) {
-            throw new UsuarioNaoEUmEntregadorException();
-        }
-
-        List<Empresa> empresas = entregadoresEmpresas.getOrDefault(entregadorId, new ArrayList<>());
-
-        if (empresas.isEmpty()) {
-            return "{[]}";
-        }
-
-        StringBuilder resultado = new StringBuilder("{[");
-        for (int i = 0; i < empresas.size(); i++) {
-            Empresa empresa = empresas.get(i);
-            resultado.append("[").append(empresa.getNome()).append(", ").append(empresa.getEndereco()).append("]");
-            if (i < empresas.size() - 1) {
-                resultado.append(", ");
-            }
-        }
-        resultado.append("]}");
-
-        return resultado.toString();
-    }
-
 
     public List<Empresa> getEmpresasDoUsuario(Usuario dono) throws UsuarioNaoPodeCriarUmaEmpresaException {
     	if(dono.getClass().equals(Cliente.class)) {
@@ -308,15 +278,4 @@ public class EmpresaService {
         ((Mercado) empresa).setAbre(abre);
         ((Mercado) empresa).setFecha(fecha);
     }
-
-    public void vincularEntregadorEmpresa(int entregadorId, Empresa empresa) {
-        List<Empresa> empresas = entregadoresEmpresas.getOrDefault(entregadorId, new ArrayList<>());
-
-        if (!empresas.contains(empresa)) {
-            empresas.add(empresa);
-            entregadoresEmpresas.put(entregadorId, empresas);
-        }
-    }
-
-
 }

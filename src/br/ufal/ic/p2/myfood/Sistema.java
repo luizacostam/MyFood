@@ -229,11 +229,38 @@ public class Sistema {
         return empresaService.criarEmpresa(tipoEmpresa, dono, nome, endereco, aberto24Horas, numeroFuncionarios);
     }
 
-    public String getEmpresas(int donoId) throws UsuarioNaoEUmEntregadorException {
-        return empresaService.getEmpresas(donoId);
+    public String getEmpresas(int entregadorId) throws UsuarioNaoEUmEntregadorException, EmpresaNaoCadastradaException {
+        Usuario entregador = usuarios.get(entregadorId);
+        if (entregador == null || !(entregador instanceof Entregador)) {
+            throw new UsuarioNaoEUmEntregadorException();
+        }
+
+        List<String> empresasVinculadas = new ArrayList<>();
+
+        for (Map.Entry<Integer, Set<Integer>> entry : entregadoresPorEmpresa.entrySet()) {
+            Integer empresaId = entry.getKey();
+            Set<Integer> entregadores = entry.getValue();
+
+            if (entregadores.contains(entregadorId)) {
+                try {
+                    Empresa empresa = empresaService.getEmpresaById(empresaId);
+                    String nomeEEndereco = "[" + empresa.getNome() + ", " + empresa.getEndereco() + "]";
+                    empresasVinculadas.add(nomeEEndereco);
+                } catch (EmpresaNaoCadastradaException e) {
+                    throw new EmpresaNaoCadastradaException();
+                }
+            }
+        }
+
+        if (empresasVinculadas.isEmpty()) {
+            throw new UsuarioNaoEUmEntregadorException();
+        }
+
+        return "{[" + String.join(", ", empresasVinculadas) + "]}";
     }
 
-	public String getEmpresasDoUsuario(int donoId) throws Exception {
+
+    public String getEmpresasDoUsuario(int donoId) throws Exception {
 	    Usuario dono = usuarios.get(donoId);
 	    List<Empresa> empresas = empresaService.getEmpresasDoUsuario(dono);
 	    StringBuilder sb = new StringBuilder("{[");

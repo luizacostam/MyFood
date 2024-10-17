@@ -1,0 +1,1 @@
+1:Pastel:1.4:alimento;1:Refrigerante:3.0:bebida;2:Refrigerante:2.4:bebida;2:Sabão:1.25:limpeza;3:Paracetamol:2.4:medicamento;3:Agua Oxigenada:5.0:higiene;

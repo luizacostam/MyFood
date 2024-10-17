@@ -121,27 +121,27 @@ public class Facade {
 		sistema.alterarFuncionamento(mercado, abre, fecha);
 	}
 
-	public void liberarPedido(int numero) throws PedidoNaoEncontradoException {
+	public void liberarPedido(int numero) throws PedidoNaoEncontradoException, PedidoJaLiberadoException, ProdutoNaoEstaSendoPreparadoException {
 		sistema.liberarPedido(numero);
 	}
 
-	public int obterPedido(int entregadorId) throws EmpresaNaoCadastradaException, UsuarioNaoEUmEntregadorException, EmpresaNaoEncontradaException {
+	public int obterPedido(int entregadorId) throws EmpresaNaoCadastradaException, EmpresaNaoEncontradaException, NaoEUmEntregadorValidoException, UsuarioNaoEUmEntregadorException, EntregadorNaoEstaEmNenhumaEmpresaException, NaoExistePedidoParaEntregaException {
 		return sistema.obterPedido(entregadorId);
 	}
 
-	public int criarEntrega(int pedidoId, int entregadorId, String destino) throws EmpresaNaoCadastradaException, UsuarioNaoEUmEntregadorException, PedidoNaoEncontradoException {
+	public int criarEntrega(int pedidoId, int entregadorId, String destino) throws PedidoNaoEncontradoException, NaoEUmEntregadorValidoException, PedidoNaoEstaProntoParaEntregaException, EntregadorAindaEmEntregaException, UsuarioNaoCadastradoException {
 		return sistema.criarEntrega(pedidoId, entregadorId, destino);
 	}
 
-	public String getEntrega(int entregaId, String atributo) throws AtributoInvalidoException, EntregaNaoExisteException {
+	public String getEntrega(int entregaId, String atributo) throws AtributoInvalidoException, EntregaNaoExisteException, AtributoNaoExisteException {
 		return sistema.getEntrega(entregaId, atributo);
 	}
 
-	public int getIdEntrega(int pedidoId) throws EntregaNaoExisteException, PedidoNaoEncontradoException {
+	public int getIdEntrega(int pedidoId) throws EntregaNaoExisteException, PedidoNaoEncontradoException, NaoExisteEntregaComEsseIdException {
 		return sistema.getIdEntrega(pedidoId);
 	}
 
-	public void entregar(int entregaId) throws EntregaNaoExisteException, PedidoNaoEncontradoException {
+	public void entregar(int entregaId) throws EntregaNaoExisteException, PedidoNaoEncontradoException, NaoExisteNadaPSerEntregueException {
 		sistema.entregar(entregaId);
 	}
 }

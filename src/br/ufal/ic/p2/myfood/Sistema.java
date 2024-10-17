@@ -488,17 +488,24 @@ public class Sistema {
         empresaService.alterarFuncionamento(mercado, abre, fecha);
     }
 
-    public void liberarPedido(int numero) throws PedidoNaoEncontradoException {
+    public void liberarPedido(int numero) throws PedidoNaoEncontradoException, PedidoJaLiberadoException, ProdutoNaoEstaSendoPreparadoException {
         Pedido pedido = pedidos.get(numero);
 
         if (pedido == null) {
             throw new PedidoNaoEncontradoException();
         }
 
+        if (pedido.getEstado().equals("pronto")) {
+            throw new PedidoJaLiberadoException();
+        }
+        if (pedido.getEstado().equals("aberto")) {
+            throw new ProdutoNaoEstaSendoPreparadoException();
+        }
+
         pedido.setEstado("pronto");
     }
 
-    public int obterPedido(int entregadorId) throws UsuarioNaoEUmEntregadorException, NenhumPedidoDisponivelException, EmpresaNaoEncontradaException, EmpresaNaoCadastradaException {
+    public int obterPedido(int entregadorId) throws NenhumPedidoDisponivelException, EmpresaNaoEncontradaException, EmpresaNaoCadastradaException, NaoEUmEntregadorValidoException, UsuarioNaoEUmEntregadorException, EntregadorNaoEstaEmNenhumaEmpresaException, NaoExistePedidoParaEntregaException {
         if (!usuarios.containsKey(entregadorId) || !(usuarios.get(entregadorId) instanceof Entregador)) {
             throw new UsuarioNaoEUmEntregadorException();
         }
@@ -507,6 +514,10 @@ public class Sistema {
                 .stream()
                 .filter(empresaId -> entregadoresPorEmpresa.get(empresaId).contains(entregadorId))
                 .collect(Collectors.toSet());
+
+        if (empresasDoEntregador.isEmpty()) {
+            throw new EntregadorNaoEstaEmNenhumaEmpresaException();
+        }
 
         Pedido pedidoPrioritario = null;
 
@@ -529,28 +540,46 @@ public class Sistema {
         }
 
         if (pedidoPrioritario == null) {
-            throw new NenhumPedidoDisponivelException();
+            throw new NaoExistePedidoParaEntregaException();
         }
 
         return pedidoPrioritario.getNumero();
     }
 
-    public int criarEntrega(int pedidoId, int entregadorId, String destino) throws PedidoNaoEncontradoException, UsuarioNaoEUmEntregadorException {
+    public int criarEntrega(int pedidoId, int entregadorId, String destino) throws PedidoNaoEncontradoException, NaoEUmEntregadorValidoException, PedidoNaoEstaProntoParaEntregaException, EntregadorAindaEmEntregaException, UsuarioNaoCadastradoException {
         Pedido pedido = pedidos.get(pedidoId);
 
         if (pedido == null) {
             throw new PedidoNaoEncontradoException();
         }
 
+        if (pedido.getEstado().equals("aberto")) {
+            throw new PedidoNaoEstaProntoParaEntregaException();
+        }
+
         if (!usuarios.containsKey(entregadorId) || !(usuarios.get(entregadorId) instanceof Entregador)) {
-            throw new UsuarioNaoEUmEntregadorException();
+            throw new NaoEUmEntregadorValidoException();
+        }
+
+        for (Entrega entrega : entregas.values()) {
+            if (entrega.getEntregador() == entregadorId) {
+                throw new EntregadorAindaEmEntregaException();
+            }
+        }
+
+        Usuario cliente = usuarios.get(getUsuarioByNome(pedido.getCliente()));
+        if (cliente == null || !(cliente instanceof Cliente)) {
+            throw new PedidoNaoEncontradoException();
+        }
+
+        if (destino == null || destino.isEmpty()) {
+            destino = ((Cliente) cliente).getEndereco();
         }
 
         List<String> nomesProdutos = pedido.getProdutos()
                 .stream()
                 .map(Produto::getNome)
                 .collect(Collectors.toList());
-
 
         Entrega entrega = new Entrega(pedido.getCliente(), pedido.getEmpresa(), pedidoId, entregadorId, destino, nomesProdutos);
 
@@ -560,11 +589,16 @@ public class Sistema {
         return entrega.getId();
     }
 
-    public String getEntrega(int entregaId, String atributo) throws EntregaNaoExisteException, AtributoInvalidoException {
+
+    public String getEntrega(int entregaId, String atributo) throws EntregaNaoExisteException, AtributoInvalidoException, AtributoNaoExisteException {
         Entrega entrega = entregas.get(entregaId);
 
         if (entrega == null) {
             throw new EntregaNaoExisteException();
+        }
+
+        if (atributo == null || atributo.isEmpty()) {
+            throw new AtributoInvalidoException();
         }
 
         switch (atributo.toLowerCase()) {
@@ -575,17 +609,17 @@ public class Sistema {
             case "pedido":
                 return String.valueOf(entrega.getPedido());
             case "entregador":
-                return String.valueOf(entrega.getEntregador());
+                return usuarios.get(entrega.getEntregador()).getNome();
             case "destino":
                 return entrega.getDestino();
             case "produtos":
-                return entrega.getProdutos().toString();
+                return "{[" + String.join(", ", entrega.getProdutos()) + "]}";
             default:
-                throw new AtributoInvalidoException();
+                throw new AtributoNaoExisteException();
         }
     }
 
-    public int getIdEntrega(int pedidoId) throws PedidoNaoEncontradoException, EntregaNaoExisteException {
+    public int getIdEntrega(int pedidoId) throws PedidoNaoEncontradoException, EntregaNaoExisteException, NaoExisteEntregaComEsseIdException {
         Pedido pedido = pedidos.get(pedidoId);
 
         if (pedido == null) {
@@ -598,14 +632,14 @@ public class Sistema {
             }
         }
 
-        throw new EntregaNaoExisteException();
+        throw new NaoExisteEntregaComEsseIdException();
     }
 
-    public void entregar(int entregaId) throws EntregaNaoExisteException, PedidoNaoEncontradoException {
+    public void entregar(int entregaId) throws EntregaNaoExisteException, PedidoNaoEncontradoException, NaoExisteNadaPSerEntregueException {
         Entrega entrega = entregas.get(entregaId);
 
         if (entrega == null) {
-            throw new EntregaNaoExisteException();
+            throw new NaoExisteNadaPSerEntregueException();
         }
 
         Pedido pedido = pedidos.get(entrega.getPedido());

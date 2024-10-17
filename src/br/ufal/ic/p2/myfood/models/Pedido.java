@@ -16,6 +16,24 @@ public class Pedido {
     private List<Produto> produtos;
     private float valor;
 
+    public Pedido(int numero, String cliente, String empresa, String estado, List<Produto> produtos) {
+        this.numero = numero;
+        this.cliente = cliente;
+        this.empresa = empresa;
+        this.estado = estado;
+        this.produtos = produtos;
+        this.valor = 0;
+
+        for (Produto produto : produtos) {
+            this.valor += produto.getValor();
+        }
+
+        if (numero >= nextNumero) {
+            nextNumero = numero + 1;
+        }
+    }
+
+
     public Pedido(String cliente, String empresa) {
         this.numero = nextNumero++;
         this.cliente = cliente;

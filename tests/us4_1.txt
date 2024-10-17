@@ -22,7 +22,7 @@
 #
 # getNumeroPedido(int: cliente, int: empresa, int indice)
 # descrição: Retorna o pedido de um cliente na empresa, ordenado de forma ao mais antigo vir primeiro no indice
-# retorno:  Retorna o número do produto
+# retorno:  Retorna o número do pedido.
 #
 # adicionarProduto(int: numero, int produto)
 # descrição: Adciona um produto da empresa ao pedido
@@ -33,7 +33,7 @@
 # retorno:  retorna uma string com o valor do atributo.
 #
 # fecharPedido(int numero)
-# descrição:  muda o estado do pedido para fechado
+# descrição:  muda o estado do pedido para preparando.
 # retorno:  Sem retorno
 #
 # removerProduto(int  pedido, String produto)
@@ -71,7 +71,7 @@ id2=login email="carlos@ufal.com.br" senha="123senha"
 ###################
 expectError "Dono de empresa nao pode fazer um pedido" criarPedido cliente=${id1} empresa=${e1}
 
-expectError "Nao existe pedido em aberto" adicionarProduto numero=9999 produto=${e1}
+expectError "Nao existe pedido em aberto" adicionarProduto numero=9999 produto=${p1}
 
 pe1=criarPedido cliente=${id2} empresa=${e1}
 

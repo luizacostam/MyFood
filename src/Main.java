@@ -10,9 +10,13 @@ public class Main {
         EasyAccept.main(new String[]{facade, "tests/us3_1.txt"});
         EasyAccept.main(new String[]{facade, "tests/us3_2.txt"});
         EasyAccept.main(new String[]{facade, "tests/us4_1.txt"});
-        //EasyAccept.main(new String[]{facade, "tests/us4_2.txt"});
+        EasyAccept.main(new String[]{facade, "tests/us4_2.txt"});
         EasyAccept.main(new String[] {facade, "tests/us5_1.txt"});
+        EasyAccept.main(new String[] {facade, "tests/us5_2.txt"});
         EasyAccept.main(new String[] {facade, "tests/us6_1.txt"});
+        EasyAccept.main(new String[] {facade, "tests/us6_2.txt"});
         EasyAccept.main(new String[] {facade, "tests/us7_1.txt"});
+        EasyAccept.main(new String[] {facade, "tests/us7_2.txt"});
+        //EasyAccept.main(new String[] {facade, "tests/us8_1.txt"});
     }
 }

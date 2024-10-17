@@ -1,1 +1,1 @@
-2:CarlosDono:carlos@ufal.com.br:123senha:Rua Exemplo N 321:544.732.410-68;
+1:Rodrigo:rodrigo@ufal.com.br:123senha:Rua Exemplo N 123:moto:BRA 1234;2:CarlosDono:carlos@ufal.com.br:123senha:Rua Exemplo N 321:544.732.410-68;3:Rodrigo:rodrigo2@ufal.com.br:123senha:Rua Exemplo N 321:moto:BRA 1234;

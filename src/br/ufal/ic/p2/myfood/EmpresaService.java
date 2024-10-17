@@ -74,7 +74,7 @@ public class EmpresaService {
         else if(!verificarHorarioValido(abre, fecha)) {
             throw new HorarioInvalidoException();
         }
-        if(tipoEmpresa == null || !tipoEmpresa.equals("mercado")) {
+        if(tipoEmpresa == null) {
             throw new TipoDeEmpresaInvalidoException();
         }
         if(tipoMercado == null) {
@@ -174,17 +174,12 @@ public class EmpresaService {
 
     public String getAtributoEmpresa(int empresaId, String atributo) throws AtributoInvalidoException, EmpresaNaoCadastradaException {
         Empresa empresa = getEmpresaById(empresaId);
+
         switch (atributo) {
             case "nome":
                 return empresa.getNome();
             case "endereco":
                 return empresa.getEndereco();
-            case "tipoCozinha":
-                if (empresa instanceof Empresa) {
-                    return empresa.getTipoCozinha();
-                } else {
-                    throw new AtributoInvalidoException();
-                }
             case "dono":
                 return empresa.getDono().getNome();
             default:
@@ -210,6 +205,13 @@ public class EmpresaService {
                         default:
                             throw new AtributoInvalidoException();
                     }
+                } else if (empresa instanceof Empresa) {
+                    switch (atributo) {
+                        case "tipoCozinha":
+                            return empresa.getTipoCozinha();
+                        default:
+                            throw new AtributoInvalidoException();
+                    }
                 } else {
                     throw new AtributoInvalidoException();
                 }
@@ -218,7 +220,6 @@ public class EmpresaService {
 
     public int getIdEmpresa(Usuario dono, String nome, int indice) throws UsuarioNaoPodeCriarUmaEmpresaException, IndiceInvalidoException, IndiceMaiorQueOEsperadoException, NaoExisteEmpresaComEsseNomeException, NomeInvalidoException {
         List<Empresa> empresasDoDono = getEmpresasDoUsuario(dono);
-        
         if (nome == null || nome.isEmpty()) {
         	throw new NomeInvalidoException();
         }

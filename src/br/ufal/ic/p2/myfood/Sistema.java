@@ -3,6 +3,7 @@ package br.ufal.ic.p2.myfood;
 import java.io.IOException;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import br.ufal.ic.p2.myfood.Exception.*;
 import br.ufal.ic.p2.myfood.models.*;
@@ -13,8 +14,8 @@ public class Sistema {
 	private Map<Integer, Usuario> usuarios = new HashMap<Integer, Usuario>();
 	private Map<Integer, Pedido> pedidos = new HashMap<Integer, Pedido>();
     private Map<Integer, Set<Integer>> entregadoresPorEmpresa;
+    private Map<Integer, Entrega> entregas = new HashMap<>();
     private Integer nextId = 1;
-	private Integer nextPedidoId = 1;
 	private EmpresaService empresaService;
 	private ProdutoService produtoService;
 	
@@ -23,17 +24,19 @@ public class Sistema {
         this.usuarios = new HashMap<>();
         this.produtoService = new ProdutoService();
 		this.empresaService = new EmpresaService();
+        this.pedidos = new HashMap<>();
         this.entregadoresPorEmpresa = new HashMap<>();
 		UtilsFileWriter.criarPasta();
-		UtilsFileReader.lerArquivos(this);
+		UtilsFileReader.lerArquivos(this, empresaService);
 	}
 	
 	public void zerarSistema() throws IOException {
-        this.usuarios = new HashMap<Integer, Usuario>();
+        this.usuarios = new HashMap<>();
         this.nextId = 1;
-        this.nextPedidoId = 1;
         this.empresaService.zerarEmpresas();
 	    this.produtoService.zerarProdutos(produtoService.getProdutos());
+        this.pedidos = new HashMap<>();
+        this.entregadoresPorEmpresa = new HashMap<>();
         UtilsFileWriter.limparArquivos();
     }
 	
@@ -42,6 +45,8 @@ public class Sistema {
 		UtilsFileWriter.persistirDados(this.usuarios);
 		UtilsFileWriter.persistirDados2(this.empresaService.getEmpresas());
 		UtilsFileWriter.persistirDados3(this.produtoService.getProdutos());
+        UtilsFileWriter.persistirDados4(this.pedidos,this, empresaService);
+        UtilsFileWriter.salvarEntregadoresPorEmpresa(this.entregadoresPorEmpresa);
 	}
 	
 	public Integer criarUsuario(String nome, String email, String senha, String endereco) throws EnderecoNaoPodeSerNuloException, NomeNaoPodeSerNuloException, ContaComEsseEmailJaExisteException, EmailInvalidoException, FormatoDeEmailInvalidoException, SenhaNaoPodeSerNulaException{
@@ -135,8 +140,19 @@ public class Sistema {
 	public Usuario getUsuarioById(int id) {
 		return this.usuarios.get(id);
 	}
-	
-	public Integer login(String email, String senha) throws LoginOuSenhaInvalidosException {
+
+    public int getUsuarioByNome(String nome) throws UsuarioNaoCadastradoException {
+        Map <Integer, Usuario> usuarios = this.usuarios;
+        for (Usuario usuario : usuarios.values()) {
+            if (usuario.getNome().equals(nome)) {
+                return usuario.getId();
+            }
+        }
+        throw new UsuarioNaoCadastradoException();
+    }
+
+
+    public Integer login(String email, String senha) throws LoginOuSenhaInvalidosException {
         for (Usuario usuario : usuarios.values()) {
             if (usuario.getEmail().equals(email) && usuario.getSenha().equals(senha)) {
             	Integer id = usuario.getId();
@@ -242,23 +258,20 @@ public class Sistema {
             Set<Integer> entregadores = entry.getValue();
 
             if (entregadores.contains(entregadorId)) {
-                try {
-                    Empresa empresa = empresaService.getEmpresaById(empresaId);
+                Empresa empresa = empresaService.getEmpresaById(empresaId);
+                if (empresa != null) {
                     String nomeEEndereco = "[" + empresa.getNome() + ", " + empresa.getEndereco() + "]";
                     empresasVinculadas.add(nomeEEndereco);
-                } catch (EmpresaNaoCadastradaException e) {
-                    throw new EmpresaNaoCadastradaException();
                 }
             }
         }
 
         if (empresasVinculadas.isEmpty()) {
-            throw new UsuarioNaoEUmEntregadorException();
+            return "{[]}";
         }
 
         return "{[" + String.join(", ", empresasVinculadas) + "]}";
     }
-
 
     public String getEmpresasDoUsuario(int donoId) throws Exception {
 	    Usuario dono = usuarios.get(donoId);
@@ -287,6 +300,9 @@ public class Sistema {
 	    return idEmpresa;
 	}
 
+    public Map<Integer, Usuario> getUsuarios() {
+        return this.usuarios;
+    }
 
     public String getAtributoEmpresa(int empresaId, String atributo) throws AtributoInvalidoException, EmpresaNaoCadastradaException {
     	if (!empresaService.empresaExiste(empresaId)) {
@@ -340,33 +356,45 @@ public class Sistema {
         }
 
         Pedido novoPedido = new Pedido(cliente.getNome(), empresa.getNome());
+        novoPedido.setEstado("aberto");
         pedidos.put(novoPedido.getNumero(), novoPedido);
         return novoPedido.getNumero();
     }
-    
-    public int getNumeroPedido(int clienteId, int empresaId, int indice) throws PedidoNaoEncontradoException, IndiceInvalidoException, EmpresaNaoCadastradaException {
+
+    public void adicionarPedido(Pedido pedido) {
+        this.pedidos.put(pedido.getNumero(), pedido);
+    }
+
+
+    public int getNumeroPedido(int clienteId, int empresaId, int indice)
+            throws PedidoNaoEncontradoException, IndiceInvalidoException, EmpresaNaoCadastradaException, UsuarioNaoCadastradoException {
+
         Usuario cliente = usuarios.get(clienteId);
         if (cliente == null) {
-            throw new PedidoNaoEncontradoException();
+            throw new UsuarioNaoCadastradoException();
         }
 
         Empresa empresa = empresaService.getEmpresaById(empresaId);
         if (empresa == null) {
-            throw new PedidoNaoEncontradoException();
+            throw new EmpresaNaoCadastradaException();
         }
-
         List<Pedido> pedidosDoCliente = pedidos.values().stream()
                 .filter(p -> p.getCliente().equals(cliente.getNome()) && p.getEmpresa().equals(empresa.getNome()))
-                .sorted((p1, p2) -> Integer.compare(p1.getNumero(), p2.getNumero()))
+                .sorted(Comparator.comparingInt(Pedido::getNumero))
                 .toList();
 
+        if (pedidosDoCliente.isEmpty()) {
+            throw new PedidoNaoEncontradoException();
+        }
         if (indice < 0 || indice >= pedidosDoCliente.size()) {
             throw new IndiceInvalidoException();
         }
+
         return pedidosDoCliente.get(indice).getNumero();
     }
-    
-    public void adicionarProduto(int numeroPedido, int produtoId) throws ProdutoNaoEncontradoNaEmpresaException, PedidoNaoEncontradoException, EmpresaNaoCadastradaException, ProdutoNaoEncontradoException, EmpresaNaoEncontradaException, PedidoNaoEstaAbertoException, ProdutoNaoPertenceAEssaEmpresaException, NaoEPossivelAdicionarNoPedidoFechadoException {
+
+
+    public void adicionarProduto(int numeroPedido, int produtoId) throws ProdutoNaoEncontradoNaEmpresaException, EmpresaNaoCadastradaException, ProdutoNaoEncontradoException, EmpresaNaoEncontradaException, PedidoNaoEstaAbertoException, ProdutoNaoPertenceAEssaEmpresaException, NaoEPossivelAdicionarNoPedidoFechadoException {
         Pedido pedido = pedidos.get(numeroPedido);
 
         if (pedido == null) {
@@ -451,7 +479,147 @@ public class Sistema {
         pedido.removerProduto(nomeProduto);
     }
 
+    public Produto getProdutoById(int produtoId) throws ProdutoNaoEncontradoException {
+        return produtoService.getProdutoById(produtoId);
+    }
+
+
     public void alterarFuncionamento(int mercado, String abre, String fecha) throws HorarioInvalidoException, EmpresaNaoCadastradaException, FormatoDeHoraInvalidoException, NaoEUmMercadoValidoException {
         empresaService.alterarFuncionamento(mercado, abre, fecha);
+    }
+
+    public void liberarPedido(int numero) throws PedidoNaoEncontradoException {
+        Pedido pedido = pedidos.get(numero);
+
+        if (pedido == null) {
+            throw new PedidoNaoEncontradoException();
+        }
+
+        pedido.setEstado("pronto");
+    }
+
+    public int obterPedido(int entregadorId) throws UsuarioNaoEUmEntregadorException, NenhumPedidoDisponivelException, EmpresaNaoEncontradaException, EmpresaNaoCadastradaException {
+        if (!usuarios.containsKey(entregadorId) || !(usuarios.get(entregadorId) instanceof Entregador)) {
+            throw new UsuarioNaoEUmEntregadorException();
+        }
+
+        Set<Integer> empresasDoEntregador = entregadoresPorEmpresa.keySet()
+                .stream()
+                .filter(empresaId -> entregadoresPorEmpresa.get(empresaId).contains(entregadorId))
+                .collect(Collectors.toSet());
+
+        Pedido pedidoPrioritario = null;
+
+        for (Pedido pedido : pedidos.values()) {
+            if (pedido.getEstado().equals("pronto")) {
+                int empresaId = empresaService.getEmpresaByName(pedido.getEmpresa()).getId();
+
+                if (empresasDoEntregador.contains(empresaId)) {
+                    Empresa empresa = empresaService.getEmpresaById(empresaId);
+
+                    if (empresa instanceof Farmacia) {
+                        return pedido.getNumero();
+                    }
+
+                    if (pedidoPrioritario == null) {
+                        pedidoPrioritario = pedido;
+                    }
+                }
+            }
+        }
+
+        if (pedidoPrioritario == null) {
+            throw new NenhumPedidoDisponivelException();
+        }
+
+        return pedidoPrioritario.getNumero();
+    }
+
+    public int criarEntrega(int pedidoId, int entregadorId, String destino) throws PedidoNaoEncontradoException, UsuarioNaoEUmEntregadorException {
+        Pedido pedido = pedidos.get(pedidoId);
+
+        if (pedido == null) {
+            throw new PedidoNaoEncontradoException();
+        }
+
+        if (!usuarios.containsKey(entregadorId) || !(usuarios.get(entregadorId) instanceof Entregador)) {
+            throw new UsuarioNaoEUmEntregadorException();
+        }
+
+        List<String> nomesProdutos = pedido.getProdutos()
+                .stream()
+                .map(Produto::getNome)
+                .collect(Collectors.toList());
+
+
+        Entrega entrega = new Entrega(pedido.getCliente(), pedido.getEmpresa(), pedidoId, entregadorId, destino, nomesProdutos);
+
+        pedido.setEstado("entregando");
+
+        entregas.put(entrega.getId(), entrega);
+        return entrega.getId();
+    }
+
+    public String getEntrega(int entregaId, String atributo) throws EntregaNaoExisteException, AtributoInvalidoException {
+        Entrega entrega = entregas.get(entregaId);
+
+        if (entrega == null) {
+            throw new EntregaNaoExisteException();
+        }
+
+        switch (atributo.toLowerCase()) {
+            case "cliente":
+                return entrega.getCliente();
+            case "empresa":
+                return entrega.getEmpresa();
+            case "pedido":
+                return String.valueOf(entrega.getPedido());
+            case "entregador":
+                return String.valueOf(entrega.getEntregador());
+            case "destino":
+                return entrega.getDestino();
+            case "produtos":
+                return entrega.getProdutos().toString();
+            default:
+                throw new AtributoInvalidoException();
+        }
+    }
+
+    public int getIdEntrega(int pedidoId) throws PedidoNaoEncontradoException, EntregaNaoExisteException {
+        Pedido pedido = pedidos.get(pedidoId);
+
+        if (pedido == null) {
+            throw new PedidoNaoEncontradoException();
+        }
+
+        for (Entrega entrega : entregas.values()) {
+            if (entrega.getPedido() == pedidoId) {
+                return entrega.getId();
+            }
+        }
+
+        throw new EntregaNaoExisteException();
+    }
+
+    public void entregar(int entregaId) throws EntregaNaoExisteException, PedidoNaoEncontradoException {
+        Entrega entrega = entregas.get(entregaId);
+
+        if (entrega == null) {
+            throw new EntregaNaoExisteException();
+        }
+
+        Pedido pedido = pedidos.get(entrega.getPedido());
+
+        if (pedido == null) {
+            throw new PedidoNaoEncontradoException();
+        }
+
+        pedido.setEstado("entregue");
+
+        entregas.remove(entregaId);
+    }
+
+    public Map<Integer, Set<Integer>> getEntregadoresPorEmpresa() {
+        return entregadoresPorEmpresa;
     }
 }

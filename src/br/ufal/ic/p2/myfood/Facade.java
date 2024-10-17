@@ -97,7 +97,7 @@ public class Facade {
     	return sistema.criarPedido(clienteId, empresaId);
     }
     
-    public int getNumeroPedido(int clienteId, int empresaId, int indice) throws PedidoNaoEncontradoException, IndiceInvalidoException, EmpresaNaoCadastradaException {
+    public int getNumeroPedido(int clienteId, int empresaId, int indice) throws PedidoNaoEncontradoException, IndiceInvalidoException, EmpresaNaoCadastradaException, UsuarioNaoCadastradoException {
     	return sistema.getNumeroPedido(clienteId, empresaId, indice);
     }
     
@@ -119,5 +119,29 @@ public class Facade {
 
 	public void alterarFuncionamento(int mercado, String abre, String fecha) throws HorarioInvalidoException, EmpresaNaoCadastradaException, FormatoDeHoraInvalidoException, NaoEUmMercadoValidoException {
 		sistema.alterarFuncionamento(mercado, abre, fecha);
+	}
+
+	public void liberarPedido(int numero) throws PedidoNaoEncontradoException {
+		sistema.liberarPedido(numero);
+	}
+
+	public int obterPedido(int entregadorId) throws EmpresaNaoCadastradaException, UsuarioNaoEUmEntregadorException, EmpresaNaoEncontradaException {
+		return sistema.obterPedido(entregadorId);
+	}
+
+	public int criarEntrega(int pedidoId, int entregadorId, String destino) throws EmpresaNaoCadastradaException, UsuarioNaoEUmEntregadorException, PedidoNaoEncontradoException {
+		return sistema.criarEntrega(pedidoId, entregadorId, destino);
+	}
+
+	public String getEntrega(int entregaId, String atributo) throws AtributoInvalidoException, EntregaNaoExisteException {
+		return sistema.getEntrega(entregaId, atributo);
+	}
+
+	public int getIdEntrega(int pedidoId) throws EntregaNaoExisteException, PedidoNaoEncontradoException {
+		return sistema.getIdEntrega(pedidoId);
+	}
+
+	public void entregar(int entregaId) throws EntregaNaoExisteException, PedidoNaoEncontradoException {
+		sistema.entregar(entregaId);
 	}
 }

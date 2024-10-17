@@ -1,1 +1,1 @@
-1:2:Pastelaria:Rua Segura N 987:brasileira;2:2:Mercado:Rua Segura N 123:supermercado;3:2:Farmacia:Rua Segura N 123:null;
+1:2:Pastelaria:Rua Segura N 987:brasileira;2:2:Mercado:Rua Segura N 123:mercado:07:30:21:00:supermercado;3:2:Farmacia:Rua Segura N 123:farmacia:true:2;

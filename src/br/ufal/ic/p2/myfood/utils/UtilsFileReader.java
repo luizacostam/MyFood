@@ -72,16 +72,13 @@ public class UtilsFileReader {
 
 			try {
 				if (dadosAtuais.length == 6) {
-					// Caso do Dono - Se há 6 atributos, é um dono e o último é o CPF
 					String cpf = dadosAtuais[5];
 					sistema.criarUsuario(nome, email, senha, endereco, cpf);
 				} else if (dadosAtuais.length == 7) {
-					// Caso do Entregador - Se há 7 atributos, é um entregador e os últimos são veiculo e placa
 					String veiculo = dadosAtuais[5];
 					String placa = dadosAtuais[6];
 					sistema.criarUsuario(nome, email, senha, endereco, veiculo, placa);
 				} else {
-					// Caso do Cliente - Se há 5 atributos, é um cliente
 					sistema.criarUsuario(nome, email, senha, endereco);
 				}
 			} catch (Exception e) {
